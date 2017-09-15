@@ -24,11 +24,19 @@ public class PdfScanApplicationTests {
 	}
 	
 	@Test
+	public void testScanArea(){
+//		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
+//		PdfScanPoint point = PdfScanPoint.genPoint(page, beginx[j%4], beginy, endx[j%4]-beginx[j%4], iterHeight) ;
+//		points.add(point);
+		
+	}
+	
+	@Test
 	public void testScanPdf(){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
-		Integer[] beginx = {250,420,590,750};
+		Integer[] beginx = {290,435,590,750};
 		Integer beginy = 580;
-		Integer[] endx = {420,590,750,910};
+		Integer[] endx = {435,590,750,900};
 		Integer iterWigth = 160;
 		Integer iterHeight = 65;
 		Integer page= 2;
