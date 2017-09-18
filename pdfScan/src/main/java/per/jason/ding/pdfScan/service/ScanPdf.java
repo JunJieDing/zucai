@@ -39,15 +39,37 @@ public class ScanPdf {
 //            stripper.setEndPage(scanPoint.getPageNum());
 //            String content = stripper.getText(document);
 //            System.out.println(content);
+            Integer y = null;
+            Integer firstY = null;
             for(PdfScanPoint scanPoint : scanPoints){
 	            PDFTextStripperByArea stripperArea = new PDFTextStripperByArea();
 	            stripperArea.setSortByPosition(true);
-	            Rectangle rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), scanPoint.getHeight());
+	            Rectangle rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), y==null?scanPoint.getHeight():y);
 	            stripperArea.addRegion("class1", rect);
 	            PDPage page = document.getPage(scanPoint.getPageNum());
 	            stripperArea.extractRegions( page );
+	            
+	            String ar = stripperArea.getTextForRegion( "class1" );
+	            String fl_ar = ar.substring(0,ar.indexOf("\n"));
+	            while((!fl_ar.contains("VS")||!fl_ar.contains("推介"))&&scanPoint.getY()<=1500){
+	            	scanPoint.setY(scanPoint.getY()+5);
+	            	rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), y==null?scanPoint.getHeight():y);
+		            stripperArea.addRegion("class1", rect);
+		            stripperArea.extractRegions( page );
+		            ar = stripperArea.getTextForRegion( "class1" );
+		            fl_ar = ar.substring(0,ar.indexOf("\n"));
+	            }
+	            if(y==null&&firstY==null){
+	            	firstY = scanPoint.getY();
+	            }else if(y==null&&scanPoint.getY()!=firstY){
+	            	y = scanPoint.getY() - firstY +10 ;
+	            }
+	            if(ar.indexOf("VS", ar.indexOf("\n"))!=-1){
+		            ar = ar.substring(0, ar.indexOf("VS", ar.indexOf("\n")));
+		            ar = ar.substring(0, ar.lastIndexOf("\n"));
+	            }
 	            System.out.println( "Text in the area:" + rect );
-	            System.out.println( stripperArea.getTextForRegion( "class1" ) );
+	            System.out.println( ar );
             }
             
                  

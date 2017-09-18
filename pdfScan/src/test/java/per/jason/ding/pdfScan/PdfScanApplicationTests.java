@@ -1,6 +1,7 @@
 package per.jason.ding.pdfScan;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Test;
@@ -32,13 +33,19 @@ public class PdfScanApplicationTests {
 	}
 	
 	@Test
+	public void testScanPdfFloatRange(){
+		PdfScanPoint point = PdfScanPoint.genPoint(2, 290, 580, 435-290, 65) ;
+		scanPdf.scanPdf("/Users/dingjunjie/Downloads/1292.pdf",Arrays.asList(point));
+	}
+	
+	@Test
 	public void testScanPdf(){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
 		Integer[] beginx = {290,435,590,750};
 		Integer beginy = 580;
 		Integer[] endx = {435,590,750,900};
 		Integer iterWigth = 160;
-		Integer iterHeight = 65;
+		Integer iterHeight = 100;
 		Integer page= 2;
 		for(int i = -1,j=2 ; i<=14 ; i++){
 			if(i>0){
@@ -47,11 +54,11 @@ public class PdfScanApplicationTests {
 				j++;
 			}
 			if(i==2||i==6||i==10){
-				beginy += iterHeight;
+				beginy += (iterHeight-40);
 			}
 			
 		}
-		scanPdf.scanPdf("C:\\Users\\jason.ding.BWH\\Downloads\\1290.pdf",points);
+		scanPdf.scanPdf("/Users/dingjunjie/Downloads/1292.pdf",points);
 	}
 
 }
