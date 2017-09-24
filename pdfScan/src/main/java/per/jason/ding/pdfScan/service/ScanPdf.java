@@ -25,7 +25,8 @@ import com.itextpdf.text.pdf.parser.TextRenderInfo;
 public class ScanPdf {
 
 	
-	public void scanPdf(String url, List<PdfScanPoint> scanPoints){
+	public List<String> scanPdf(String url, List<PdfScanPoint> scanPoints){
+		List<String> result = new ArrayList<String>();
 		File pdfFile = new File(url);
         PDDocument document = null;
         try
@@ -44,16 +45,16 @@ public class ScanPdf {
             for(PdfScanPoint scanPoint : scanPoints){
 	            PDFTextStripperByArea stripperArea = new PDFTextStripperByArea();
 	            stripperArea.setSortByPosition(true);
-	            Rectangle rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), y==null?scanPoint.getHeight():y);
+	            Rectangle rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), (y==null||y<0)?scanPoint.getHeight():y);
 	            stripperArea.addRegion("class1", rect);
 	            PDPage page = document.getPage(scanPoint.getPageNum());
 	            stripperArea.extractRegions( page );
 	            
 	            String ar = stripperArea.getTextForRegion( "class1" );
 	            String fl_ar = ar.substring(0,ar.indexOf("\n"));
-	            while((!fl_ar.contains("VS")||!fl_ar.contains("推介"))&&scanPoint.getY()<=1500){
+	            while((!fl_ar.contains(scanPoint.getStartKeyword1())||!fl_ar.contains(scanPoint.getStartKeyword2()))&&scanPoint.getY()<=scanPoint.getEndY()){
 	            	scanPoint.setY(scanPoint.getY()+5);
-	            	rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), y==null?scanPoint.getHeight():y);
+	            	rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), (y==null||y<0)?scanPoint.getHeight():y);
 		            stripperArea.addRegion("class1", rect);
 		            stripperArea.extractRegions( page );
 		            ar = stripperArea.getTextForRegion( "class1" );
@@ -64,12 +65,13 @@ public class ScanPdf {
 	            }else if(y==null&&scanPoint.getY()!=firstY){
 	            	y = scanPoint.getY() - firstY +10 ;
 	            }
-	            if(ar.indexOf("VS", ar.indexOf("\n"))!=-1){
-		            ar = ar.substring(0, ar.indexOf("VS", ar.indexOf("\n")));
+	            if(ar.indexOf(scanPoint.getEndKeyword1(), ar.indexOf("\n"))!=-1){
+		            ar = ar.substring(0, ar.indexOf(scanPoint.getEndKeyword1(), ar.indexOf("\n")));
 		            ar = ar.substring(0, ar.lastIndexOf("\n"));
 	            }
-	            System.out.println( "Text in the area:" + rect );
+	            System.out.println( "Text in the area:" + rect +" page:"+scanPoint.getPageNum());
 	            System.out.println( ar );
+	            result.add(ar);
             }
             
                  
@@ -78,6 +80,7 @@ public class ScanPdf {
         {
             System.out.println(e);
         }
+        return result;
 	} 
 	
 }

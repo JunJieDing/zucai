@@ -8,15 +8,71 @@ public class PdfScanPoint {
 	private Integer width;
 	private Integer height;
 	
-	public static PdfScanPoint genPoint(Integer page,Integer x,Integer y,Integer width,Integer height){
+	private String startKeyword1;
+	private String startKeyword2;
+	private String endKeyword1;
+	
+	private Integer endY;
+	
+	
+	public static PdfScanPoint genPoint(Integer page,Integer x,Integer y,Integer width,Integer height,String k1, String k2, Integer endY,String k3){
 		PdfScanPoint p = new PdfScanPoint();
 		p.setPageNum(page);
 		p.setX(x);
 		p.setY(y);
 		p.setWidth(width);
 		p.setHeight(height);
+		p.setStartKeyword1(k1);
+		p.setStartKeyword2(k2);
+		p.setEndY(endY);
+		p.setEndKeyword1(k3);
 		return p;
 	}
+	
+	
+	
+	public String getEndKeyword1() {
+		return endKeyword1;
+	}
+
+
+
+	public void setEndKeyword1(String endKeyword1) {
+		this.endKeyword1 = endKeyword1;
+	}
+
+
+
+	public String getStartKeyword1() {
+		return startKeyword1;
+	}
+
+
+	public void setStartKeyword1(String startKeyword1) {
+		this.startKeyword1 = startKeyword1;
+	}
+
+
+	public String getStartKeyword2() {
+		return startKeyword2;
+	}
+
+
+	public void setStartKeyword2(String startKeyword2) {
+		this.startKeyword2 = startKeyword2;
+	}
+
+
+	public Integer getEndY() {
+		return endY;
+	}
+
+
+	public void setEndY(Integer endY) {
+		this.endY = endY;
+	}
+
+
 	public Integer getPageNum() {
 		return pageNum;
 	}
