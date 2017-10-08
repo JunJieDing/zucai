@@ -17,6 +17,7 @@ import per.jason.ding.pdfScan.domain.GameRate;
 import per.jason.ding.pdfScan.domain.PdfScanPoint;
 import per.jason.ding.pdfScan.domain.Rate;
 import per.jason.ding.pdfScan.service.ScanPdf;
+import per.jason.ding.pdfScan.service.ScanService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -24,6 +25,14 @@ public class PdfScanApplicationTests {
 
 	@Autowired
 	private ScanPdf scanPdf;
+	
+	@Autowired
+	private ScanService scanService;
+	
+	@Test
+	public void testScan(){
+		scanService.outputResult("/Users/dingjunjie/Downloads/853_45859208.pdf");
+	}
 	
 	@Test
 	public void contextLoads() {
