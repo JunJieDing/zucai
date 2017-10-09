@@ -12,6 +12,12 @@ import per.jason.ding.pdfScan.service.ScanService;
 @SpringBootTest
 public class ScanServiceTest {
 
+	@Autowired
+	private ScanService scanService;
 	
+	@Test
+	public void testScan(){
+		scanService.outputResult("");
+	}
 	
 }

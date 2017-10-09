@@ -26,14 +26,6 @@ public class PdfScanApplicationTests {
 	@Autowired
 	private ScanPdf scanPdf;
 	
-	@Autowired
-	private ScanService scanService;
-	
-	@Test
-	public void testScan(){
-		scanService.outputResult("/Users/dingjunjie/Downloads/853_45859208.pdf");
-	}
-	
 	@Test
 	public void contextLoads() {
 	}
