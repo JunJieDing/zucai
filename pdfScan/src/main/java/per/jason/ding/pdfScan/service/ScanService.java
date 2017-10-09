@@ -102,12 +102,21 @@ public class ScanService {
 		}
 //		result.put(init_win, calDiffent(winRates).get(RESULT));
 		System.out.println(gameName);
-		System.out.println(calDiffent(winRates).get(RESULT)/1+"    "+calDiffent(evenRates).get(RESULT)/1+"    "+calDiffent(loseRates).get(RESULT)/1);
+//		System.out.println("init rate");
+//		System.out.println(calDiffent(winRates).get(MAX)/1+"    "+calDiffent(evenRates).get(MAX)/1+"    "+calDiffent(loseRates).get(MAX)/1);
+//		System.out.println(calDiffent(winRates).get(MIN)/1+"    "+calDiffent(evenRates).get(MIN)/1+"    "+calDiffent(loseRates).get(MIN)/1);
+//		System.out.println(calDiffent(winRates).get(RESULT)/1+"    "+calDiffent(evenRates).get(RESULT)/1+"    "+calDiffent(loseRates).get(RESULT)/1);
+		System.out.println("init curry");
+		System.out.println(calDiffent(winCurryRates).get(MAX)/1+"    "+calDiffent(evenCurryRates).get(MAX)/1+"    "+calDiffent(loseCurryRates).get(MAX)/1);
+		System.out.println(calDiffent(winCurryRates).get(MIN)/1+"    "+calDiffent(evenCurryRates).get(MIN)/1+"    "+calDiffent(loseCurryRates).get(MIN)/1);
 		System.out.println(calDiffent(winCurryRates).get(RESULT)/1+"    "+calDiffent(evenCurryRates).get(RESULT)/1+"    "+calDiffent(loseCurryRates).get(RESULT)/1);
-		System.out.println(calDiffent(cwinRates).get(RESULT)/1+"    "+calDiffent(cevenRates).get(RESULT)/1+"    "+calDiffent(closeRates).get(RESULT)/1);
+		System.out.println("current curry");
+//		System.out.println(calDiffent(cwinRates).get(RESULT)/1+"    "+calDiffent(cevenRates).get(RESULT)/1+"    "+calDiffent(closeRates).get(RESULT)/1);
 		System.out.println(calDiffent(cwinCurryRates).get(RESULT)/1+"    "+calDiffent(cevenCurryRates).get(RESULT)/1+"    "+calDiffent(closeCurryRates).get(RESULT)/1);
-		System.out.println(calDiffent(nwinRates).get(RESULT)/1+"    "+calDiffent(nevenRates).get(RESULT)/1+"    "+calDiffent(nloseRates).get(RESULT)/1);
+		System.out.println("nature curry");
 		System.out.println(calDiffent(nwinCurryRates).get(RESULT)/1+"    "+calDiffent(nevenCurryRates).get(RESULT)/1+"    "+calDiffent(nloseCurryRates).get(RESULT)/1);
+		System.out.println("nature rate");
+		System.out.println(calDiffent(nwinRates).get(RESULT)/1+"    "+calDiffent(nevenRates).get(RESULT)/1+"    "+calDiffent(nloseRates).get(RESULT)/1);
 		
 		return result;
 	}
@@ -138,7 +147,7 @@ public class ScanService {
 					String[] items = line.split(" ");
 					if(items.length<8)
 						continue;
-					CompanyRate company = game.getCompanyRate().get(items[0])==null?new CompanyRate():game.getCompanyRate().get(items[0]);
+					CompanyRate company = game.getCompanyRate().get(items[0].toLowerCase())==null?new CompanyRate():game.getCompanyRate().get(items[0].toLowerCase());
 					company.setCompanyName(items[0].toLowerCase());
 					company.setCurrentRate(new Rate(items[1],items[2],items[3]));
 					company.setCurrentCurry(new Rate(items[7],items[8],items[9]));
@@ -166,6 +175,7 @@ public class ScanService {
 			for(int i=0 ; i<lines.length ; i++){
 				CompanyRate company = new CompanyRate();
 				String line = lines[i];
+				line = line.replace("Ineterwetten", "Interwetten");
 				if(i==0){
 					game.setGameName(line.substring(line.indexOf("、")+1,line.lastIndexOf(" ")));
 				}
