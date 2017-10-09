@@ -58,18 +58,52 @@ public class ScanService {
 		List<Double> winCurryRates = new ArrayList<Double>();
 		List<Double> evenCurryRates = new ArrayList<Double>();
 		List<Double> loseCurryRates = new ArrayList<Double>();
+		List<Double> cwinRates = new ArrayList<Double>();
+		List<Double> cevenRates = new ArrayList<Double>();
+		List<Double> closeRates = new ArrayList<Double>();
+		List<Double> cwinCurryRates = new ArrayList<Double>();
+		List<Double> cevenCurryRates = new ArrayList<Double>();
+		List<Double> closeCurryRates = new ArrayList<Double>();
+		List<Double> nwinRates = new ArrayList<Double>();
+		List<Double> nevenRates = new ArrayList<Double>();
+		List<Double> nloseRates = new ArrayList<Double>();
+		List<Double> nwinCurryRates = new ArrayList<Double>();
+		List<Double> nevenCurryRates = new ArrayList<Double>();
+		List<Double> nloseCurryRates = new ArrayList<Double>();
 		for(CompanyRate cr : gr.getCompanyRate().values()){
-			winRates.add(cr.getInitRate().getWin().doubleValue()*100);
-			evenRates.add(cr.getInitRate().getEven().doubleValue()*100);
-			loseRates.add(cr.getInitRate().getLose().doubleValue()*100);
-			winCurryRates.add(cr.getInitCurry().getWin().doubleValue()*100);
-			evenCurryRates.add(cr.getInitCurry().getEven().doubleValue()*100);
-			loseCurryRates.add(cr.getInitCurry().getLose().doubleValue()*100);
+			if(cr.getInitRate()!=null){
+				winRates.add(cr.getInitRate().getWin().doubleValue()*100);
+				evenRates.add(cr.getInitRate().getEven().doubleValue()*100);
+				loseRates.add(cr.getInitRate().getLose().doubleValue()*100);
+				winCurryRates.add(cr.getInitCurry().getWin().doubleValue()*100);
+				evenCurryRates.add(cr.getInitCurry().getEven().doubleValue()*100);
+				loseCurryRates.add(cr.getInitCurry().getLose().doubleValue()*100);
+				cwinRates.add(cr.getCurrentRate().getWin().doubleValue()*100);
+				cevenRates.add(cr.getCurrentRate().getEven().doubleValue()*100);
+				closeRates.add(cr.getCurrentRate().getLose().doubleValue()*100);
+				cwinCurryRates.add(cr.getCurrentCurry().getWin().doubleValue()*100);
+				cevenCurryRates.add(cr.getCurrentCurry().getEven().doubleValue()*100);
+				closeCurryRates.add(cr.getCurrentCurry().getLose().doubleValue()*100);
+			}
+			if(cr.getCurrentRate()!=null){
+				nwinRates.add(cr.getCurrentRate().getWin().doubleValue()*100);
+				nevenRates.add(cr.getCurrentRate().getEven().doubleValue()*100);
+				nloseRates.add(cr.getCurrentRate().getLose().doubleValue()*100);
+				nwinCurryRates.add(cr.getCurrentCurry().getWin().doubleValue()*100);
+				nevenCurryRates.add(cr.getCurrentCurry().getEven().doubleValue()*100);
+				nloseCurryRates.add(cr.getCurrentCurry().getLose().doubleValue()*100);
+			}
+			
 		}
 //		result.put(init_win, calDiffent(winRates).get(RESULT));
 		System.out.println(gameName);
 		System.out.println(calDiffent(winRates).get(RESULT)/1+"    "+calDiffent(evenRates).get(RESULT)/1+"    "+calDiffent(loseRates).get(RESULT)/1);
 		System.out.println(calDiffent(winCurryRates).get(RESULT)/1+"    "+calDiffent(evenCurryRates).get(RESULT)/1+"    "+calDiffent(loseCurryRates).get(RESULT)/1);
+		System.out.println(calDiffent(cwinRates).get(RESULT)/1+"    "+calDiffent(cevenRates).get(RESULT)/1+"    "+calDiffent(closeRates).get(RESULT)/1);
+		System.out.println(calDiffent(cwinCurryRates).get(RESULT)/1+"    "+calDiffent(cevenCurryRates).get(RESULT)/1+"    "+calDiffent(closeCurryRates).get(RESULT)/1);
+		System.out.println(calDiffent(nwinRates).get(RESULT)/1+"    "+calDiffent(nevenRates).get(RESULT)/1+"    "+calDiffent(nloseRates).get(RESULT)/1);
+		System.out.println(calDiffent(nwinCurryRates).get(RESULT)/1+"    "+calDiffent(nevenCurryRates).get(RESULT)/1+"    "+calDiffent(nloseCurryRates).get(RESULT)/1);
+		
 		return result;
 	}
 	
@@ -88,12 +122,28 @@ public class ScanService {
 	}
 	
 	public Map<String,GameRate> processCurrentRate(List<String> current,Map<String,GameRate> initMap){
-		int i = 0;
 		for(String key : initMap.keySet()){
 			GameRate game = initMap.get(key);
-//			String current.get(i);
-			
-			i++;
+			for(String init : current){
+				String[] lines = init.split("\n");
+				for(int i=0 ; i<lines.length ; i++){
+					String line = lines[i];
+					if(i==0){
+						game.setGameName(line.substring(line.indexOf("、")+1,line.lastIndexOf(" ")));
+					}
+					if(i>1){
+						String[] items = line.split(" ");
+						if(items.length<8)
+							continue;
+						CompanyRate company = game.getCompanyRate().get(items[0])==null?new CompanyRate():game.getCompanyRate().get(items[0]);
+						company.setCompanyName(items[0]);
+						company.setCurrentRate(new Rate(items[1],items[2],items[3]));
+						company.setCurrentCurry(new Rate(items[7],items[8],items[9]));
+						game.getCompanyRate().put(company.getCompanyName(), company);
+					}
+				}
+				initMap.put(game.getGameName(), game);
+			}
 		}
 		return initMap;
 	}
