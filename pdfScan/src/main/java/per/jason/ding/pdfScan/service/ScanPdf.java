@@ -62,7 +62,7 @@ public class ScanPdf {
 	            }
 	            if(y==null&&firstY==null){
 	            	firstY = scanPoint.getY();
-	            }else if(y==null&&scanPoint.getY()!=firstY){
+	            }else if(y==null&&!scanPoint.getY().equals(firstY)){
 	            	y = scanPoint.getY() - firstY +10 ;
 	            }
 	            if(ar.indexOf(scanPoint.getEndKeyword1(), ar.indexOf("\n"))!=-1){

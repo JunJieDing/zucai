@@ -12,9 +12,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import per.jason.ding.pdfScan.domain.CompanyRate;
+import per.jason.ding.pdfScan.domain.GamePoint;
 import per.jason.ding.pdfScan.domain.GameRate;
 import per.jason.ding.pdfScan.domain.PdfScanPoint;
 import per.jason.ding.pdfScan.domain.Rate;
+import per.jason.ding.pdfScan.domain.WeekResult;
 
 @Service
 public class ScanService {
@@ -42,16 +44,17 @@ public class ScanService {
 	private static int curry_lose = 11;
 	
 	public void outputResult(String inputUrl){
+		WeekResult wr = new WeekResult();
 		String url = fileurl==null?inputUrl:fileurl;
-		Map<String,GameRate> map = processInitRate(scanInitRate(url));
-		processCurrentRate(scanCurrentRate(url),map);
+		Map<String,GameRate> map = processInitRate(scanSundayInitRate(url));
+		processCurrentRate(scanSundayCurrentRate(url),map);
 		for(GameRate gr: map.values()){
-			calGameRate(gr);
+			calGameRate(gr,wr);
 		}
 	}
 	
-	public Map<Integer,Double> calGameRate(GameRate gr){
-		Map<Integer ,Double> result = new HashMap<Integer, Double>();
+	public GamePoint calGameRate(GameRate gr,WeekResult wr){
+		GamePoint gp = new GamePoint();
 		String gameName = gr.getGameName();
 		List<Integer> winRates = new ArrayList<Integer>();
 		List<Integer> evenRates = new ArrayList<Integer>();
@@ -102,23 +105,35 @@ public class ScanService {
 		}
 //		result.put(init_win, calDiffent(winRates).get(RESULT));
 		System.out.println(gameName);
+		gp.setGameName(gameName);
 //		System.out.println("init rate");
 //		System.out.println(calDiffent(winRates).get(MAX)/1+"    "+calDiffent(evenRates).get(MAX)/1+"    "+calDiffent(loseRates).get(MAX)/1);
 //		System.out.println(calDiffent(winRates).get(MIN)/1+"    "+calDiffent(evenRates).get(MIN)/1+"    "+calDiffent(loseRates).get(MIN)/1);
 //		System.out.println(calDiffent(winRates).get(RESULT)/1+"    "+calDiffent(evenRates).get(RESULT)/1+"    "+calDiffent(loseRates).get(RESULT)/1);
 		System.out.println("init curry");
-		System.out.println(calDiffent(winCurryRates).get(MAX)/1+"    "+calDiffent(evenCurryRates).get(MAX)/1+"    "+calDiffent(loseCurryRates).get(MAX)/1);
-		System.out.println(calDiffent(winCurryRates).get(MIN)/1+"    "+calDiffent(evenCurryRates).get(MIN)/1+"    "+calDiffent(loseCurryRates).get(MIN)/1);
+//		System.out.println(calDiffent(winCurryRates).get(MAX)/1+"    "+calDiffent(evenCurryRates).get(MAX)/1+"    "+calDiffent(loseCurryRates).get(MAX)/1);
+//		System.out.println(calDiffent(winCurryRates).get(MIN)/1+"    "+calDiffent(evenCurryRates).get(MIN)/1+"    "+calDiffent(loseCurryRates).get(MIN)/1);
 		System.out.println(calDiffent(winCurryRates).get(RESULT)/1+"    "+calDiffent(evenCurryRates).get(RESULT)/1+"    "+calDiffent(loseCurryRates).get(RESULT)/1);
+		gp.setOne_win(calDiffent(winCurryRates).get(RESULT)/1);
+		gp.setOne_even(calDiffent(evenCurryRates).get(RESULT)/1);
+		gp.setOne_lose(calDiffent(loseCurryRates).get(RESULT)/1);
 		System.out.println("current curry");
 //		System.out.println(calDiffent(cwinRates).get(RESULT)/1+"    "+calDiffent(cevenRates).get(RESULT)/1+"    "+calDiffent(closeRates).get(RESULT)/1);
 		System.out.println(calDiffent(cwinCurryRates).get(RESULT)/1+"    "+calDiffent(cevenCurryRates).get(RESULT)/1+"    "+calDiffent(closeCurryRates).get(RESULT)/1);
+		gp.setTwo_win(calDiffent(cwinCurryRates).get(RESULT)/1);
+		gp.setTwo_even(calDiffent(cevenCurryRates).get(RESULT)/1);
+		gp.setTwo_lose(calDiffent(closeCurryRates).get(RESULT)/1);
 		System.out.println("nature curry");
 		System.out.println(calDiffent(nwinCurryRates).get(RESULT)/1+"    "+calDiffent(nevenCurryRates).get(RESULT)/1+"    "+calDiffent(nloseCurryRates).get(RESULT)/1);
+		gp.setNature_curry_win(calDiffent(nwinCurryRates).get(RESULT)/1);
+		gp.setNature_curry_even(calDiffent(nevenCurryRates).get(RESULT)/1);
+		gp.setNature_curry_lose(calDiffent(nloseCurryRates).get(RESULT)/1);
 		System.out.println("nature rate");
+		gp.setNature_win(calDiffent(nwinRates).get(RESULT)/1);
+		gp.setNature_even(calDiffent(nevenRates).get(RESULT)/1);
+		gp.setNature_lose(calDiffent(nloseRates).get(RESULT)/1);
 		System.out.println(calDiffent(nwinRates).get(RESULT)/1+"    "+calDiffent(nevenRates).get(RESULT)/1+"    "+calDiffent(nloseRates).get(RESULT)/1);
-		
-		return result;
+		return gp;
 	}
 	
 	public Map<String, Integer> calDiffent(List<Integer> rates){
@@ -181,6 +196,7 @@ public class ScanService {
 				}
 				if(i>1){
 					String[] items = line.split(" ");
+					if(items.length<7) continue;
 					company.setCompanyName(items[0].toLowerCase());
 					company.setInitRate(new Rate(items[1],items[2],items[3]));
 					company.setInitCurry(new Rate(items[4],items[5],items[6]));
@@ -193,6 +209,50 @@ public class ScanService {
 	}
 	
 
+	public List<String> scanSundayInitRate(String url){
+		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
+		Integer[] beginx = {290,435,590,750};
+		Integer beginy = 520;
+		Integer[] endx = {435,590,750,900};
+		Integer iterWigth = 160;
+		Integer iterHeight = 100;
+		Integer page= 12;
+		for(int i = -1,j=2 ; i<=14 ; i++){
+			if(i>0){
+				PdfScanPoint point = PdfScanPoint.genPoint(page, beginx[j%4], beginy, endx[j%4]-beginx[j%4], iterHeight,"VS", "推介", 1500,"VS") ;
+				points.add(point);
+				j++;
+			}
+			if(i==2||i==6||i==10){
+				beginy += (iterHeight-40);
+			}
+			
+		}
+//		return scanPdf.scanPdf("/Users/dingjunjie/Downloads/1292.pdf",points);
+		return scanPdf.scanPdf(url, points);
+	}
+	
+	public List<String> scanSundayCurrentRate(String url){
+		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
+		Integer[] beginx={150,600};
+		Integer[] endx={360,810};
+		Integer iterHeight = 200;
+		Integer beginy = 1150;
+		Integer page = 9;
+		for(int i=0; i<14;i++){
+			PdfScanPoint point = PdfScanPoint.genPoint(page, beginx[i%2], beginy, endx[i%2]-beginx[i%2], iterHeight,"凯利指数 赔付", "", beginy+300,"周三99家平均") ;
+			points.add(point);
+			if(i!=1&&i!=7&&i%2==1){
+				beginy +=(iterHeight+250);
+			}else if(i==1||i==7){
+				beginy=205;
+				page +=1;
+			}
+		}
+//		return scanPdf.scanPdf("/Users/dingjunjie/Downloads/1292.pdf",points);
+		return scanPdf.scanPdf(url, points);
+	}
+	
 	public List<String> scanInitRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
 		Integer[] beginx = {290,435,590,750};
