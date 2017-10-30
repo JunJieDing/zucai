@@ -54,7 +54,7 @@ public class ScanPdf {
 	            String fl_ar = ar.substring(0,ar.indexOf("\n"));
 	            while((!fl_ar.contains(scanPoint.getStartKeyword1())||!fl_ar.contains(scanPoint.getStartKeyword2()))&&scanPoint.getY()<=scanPoint.getEndY()){
 	            	scanPoint.setY(scanPoint.getY()+5);
-	            	rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), (y==null||y<0)?scanPoint.getHeight():y);
+	            	rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), (y==null||y<20)?scanPoint.getHeight():y);
 		            stripperArea.addRegion("class1", rect);
 		            stripperArea.extractRegions( page );
 		            ar = stripperArea.getTextForRegion( "class1" );

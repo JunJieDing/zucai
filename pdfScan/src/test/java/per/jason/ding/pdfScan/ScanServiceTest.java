@@ -17,7 +17,7 @@ public class ScanServiceTest {
 	
 	@Test
 	public void testScan(){
-		scanService.outputResult("");
+		scanService.genWeekResult("");
 	}
 	
 }

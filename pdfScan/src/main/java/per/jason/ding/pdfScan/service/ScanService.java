@@ -43,11 +43,25 @@ public class ScanService {
 	private static int curry_even = 10;
 	private static int curry_lose = 11;
 	
-	public void outputResult(String inputUrl){
+	public void genWeekResult(String inputUrl){
 		WeekResult wr = new WeekResult();
+		outputResult(inputUrl,wr);
+		outputSundayResult(inputUrl, wr);
+	}
+	
+	public void outputSundayResult(String inputUrl, WeekResult wr){
 		String url = fileurl==null?inputUrl:fileurl;
 		Map<String,GameRate> map = processInitRate(scanSundayInitRate(url));
 		processCurrentRate(scanSundayCurrentRate(url),map);
+		for(GameRate gr: map.values()){
+			calGameRate(gr,wr);
+		}
+	}
+	
+	public void outputResult(String inputUrl, WeekResult wr){
+		String url = fileurl==null?inputUrl:fileurl;
+		Map<String,GameRate> map = processInitRate(scanInitRate(url));
+		processCurrentRate(scanCurrentRate(url),map);
 		for(GameRate gr: map.values()){
 			calGameRate(gr,wr);
 		}
@@ -104,7 +118,7 @@ public class ScanService {
 			
 		}
 //		result.put(init_win, calDiffent(winRates).get(RESULT));
-		System.out.println(gameName);
+		System.out.println(gr.getGameNo()+" "+gameName);
 		gp.setGameName(gameName);
 //		System.out.println("init rate");
 //		System.out.println(calDiffent(winRates).get(MAX)/1+"    "+calDiffent(evenRates).get(MAX)/1+"    "+calDiffent(loseRates).get(MAX)/1);
@@ -192,6 +206,7 @@ public class ScanService {
 				String line = lines[i];
 				line = line.replace("Ineterwetten", "Interwetten");
 				if(i==0){
+					game.setGameNo(Integer.valueOf(line.substring(0,line.indexOf("、"))));
 					game.setGameName(line.substring(line.indexOf("、")+1,line.lastIndexOf(" ")));
 				}
 				if(i>1){
@@ -208,7 +223,31 @@ public class ScanService {
 		return map;
 	}
 	
-
+	public List<String> scanLateCurrentRate(String url){
+		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
+		Integer page= 1;
+		points.add(PdfScanPoint.genPoint(page, 550, 20, 50, 250,"公司名称", "", 1500,"最高赔率"));
+		Integer[] beginx = {150,250,350,450,550,650};
+		Integer beginy = 100;
+		Integer[] endx = {250,350,450,550,650,750};
+		Integer iterWigth = 100;
+		Integer iterHeight = 200;
+		for(int i = -1,j=2 ; i<=14 ; i++){
+			if(i>0){
+				PdfScanPoint point = PdfScanPoint.genPoint(page, 550, 20, 50, 250,"公司名称", "", 1500,"最高赔率");
+				points.add(point);
+				j++;
+			}
+			if(i==2||i==6||i==10){
+				beginy += (iterHeight-40);
+			}
+			
+		}
+//		return scanPdf.scanPdf("/Users/dingjunjie/Downloads/1292.pdf",points);
+		return scanPdf.scanPdf(url, points);
+	
+	}
+	
 	public List<String> scanSundayInitRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
 		Integer[] beginx = {290,435,590,750};

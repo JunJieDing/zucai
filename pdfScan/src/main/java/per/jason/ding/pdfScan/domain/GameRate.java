@@ -11,6 +11,8 @@ public class GameRate {
 	
 	private Map<String,CompanyRate> companyRate = new HashMap<String,CompanyRate>();
 	
+	private Integer gameNo;
+	
 	public String getDate() {
 		return date;
 	}
@@ -33,6 +35,15 @@ public class GameRate {
 
 	public void setCompanyRate(Map<String, CompanyRate> companyRate) {
 		this.companyRate = companyRate;
+	}
+
+	
+	public Integer getGameNo() {
+		return gameNo;
+	}
+
+	public void setGameNo(Integer gameNo) {
+		this.gameNo = gameNo;
 	}
 
 	@Override
