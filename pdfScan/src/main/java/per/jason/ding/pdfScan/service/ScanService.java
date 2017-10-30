@@ -2,6 +2,7 @@ package per.jason.ding.pdfScan.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +28,9 @@ public class ScanService {
 	@Value(value="${file.url}")
 	private String fileurl;
 	
+	@Value(value="${file.sat.url}")
+	private String satFileUrl;
+	
 	private static String MAX = "max";
 	private static String MIN = "min";
 	private static String RESULT = "result";
@@ -42,6 +46,11 @@ public class ScanService {
 	private static int curry_win = 9;
 	private static int curry_even = 10;
 	private static int curry_lose = 11;
+	
+	public void outputLateResult(String input){
+		String url = satFileUrl==null?input:satFileUrl;
+		scanLateCurrentRate(url);
+	}
 	
 	public void genWeekResult(String inputUrl){
 		WeekResult wr = new WeekResult();
@@ -164,6 +173,59 @@ public class ScanService {
 		return result;
 	}
 	
+	public Map<String,GameRate> processLateRate(List<String> late){
+		List<String> tempGame = new ArrayList<String>();
+		int gameNo = 0;
+		Map<String,GameRate> result = new LinkedHashMap<String,GameRate>();
+		for(String line : late){
+			if(line.contains("VS")){
+				tempGame = new ArrayList<String>();
+				String[] games = line.split("、1");
+				for(String gameName : line.split("、1")){
+					if(gameName.contains("VS")){
+						GameRate gr = new GameRate();
+						gr.setGameName(line.substring(0,line.indexOf(" 推介")));
+						tempGame.add(gr.getGameName());
+						result.put(gr.getGameName(), gr);
+						gameNo ++ ;
+
+					}
+				}
+			}else{
+				String[] temp =  line.split(" ");
+				String compName = temp[0];
+				List<String[]> rates = getListStringArray(Arrays.copyOfRange(temp, 1, temp.length),7);
+				for(int i =0 ;i<rates.size();i++){
+					result.get(tempGame.get(i)).getCompanyRate().put(compName, sambleCompanyRage(compName, rates.get(i)));
+				}
+			}
+		}
+		return result;
+	}
+	
+	private static List<String[]> getListStringArray(String[] dd, int b) {  
+        List<String[]> aa = new ArrayList<String[]>();  
+        // tyy 取整代表可以拆分的数组个数  
+        int f = dd.length / b;  
+        for (int i = 0; i < f; i++) {  
+            String[] bbb = new String[b];  
+            for (int j = 0; j < b; j++) {  
+                bbb[j] = dd[j + i * b];  
+            }  
+            aa.add(bbb);  
+        }  
+        return aa;  
+    }
+
+	
+	public CompanyRate sambleCompanyRage(String companyName, String[] items){
+		CompanyRate rate = new CompanyRate();
+		rate.setCompanyName(companyName);
+		rate.setInitRate(new Rate(items[0],items[1],items[2]));
+		rate.setInitCurry(new Rate(items[3],items[4],items[5]));
+		return rate;
+	}
+	
 	public Map<String,GameRate> processCurrentRate(List<String> current,Map<String,GameRate> initMap){
 		int j = 0;
 		for(String key : initMap.keySet()){
@@ -187,13 +249,6 @@ public class ScanService {
 			j++;
 		}
 		return initMap;
-	}
-	
-	public Map<String, String> processCurrent(String item){
-		Map<String, String> map = new HashMap<String, String>();
-//		map.put(, value)
-		
-		return map;
 	}
 	
 	public Map<String,GameRate>  processInitRate(List<String> inits){
@@ -226,24 +281,9 @@ public class ScanService {
 	public List<String> scanLateCurrentRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
 		Integer page= 1;
-		points.add(PdfScanPoint.genPoint(page, 550, 20, 50, 250,"公司名称", "", 1500,"最高赔率"));
-		Integer[] beginx = {150,250,350,450,550,650};
-		Integer beginy = 100;
-		Integer[] endx = {250,350,450,550,650,750};
-		Integer iterWigth = 100;
-		Integer iterHeight = 200;
-		for(int i = -1,j=2 ; i<=14 ; i++){
-			if(i>0){
-				PdfScanPoint point = PdfScanPoint.genPoint(page, 550, 20, 50, 250,"公司名称", "", 1500,"最高赔率");
-				points.add(point);
-				j++;
-			}
-			if(i==2||i==6||i==10){
-				beginy += (iterHeight-40);
-			}
-			
-		}
-//		return scanPdf.scanPdf("/Users/dingjunjie/Downloads/1292.pdf",points);
+		points.add(PdfScanPoint.genPoint(page, 705, 100, 350, 250,"公司名称", "", 1500,"最高赔率"));
+		points.add(PdfScanPoint.genPoint(page, 0, 350, 1500, 250,"公司名称", "", 1500,"最高赔率"));
+		points.add(PdfScanPoint.genPoint(page, 0, 600, 1500, 250,"公司名称", "", 1500,"最高赔率"));
 		return scanPdf.scanPdf(url, points);
 	
 	}

@@ -20,4 +20,9 @@ public class ScanServiceTest {
 		scanService.genWeekResult("");
 	}
 	
+	@Test
+	public void testSatScan(){
+		scanService.outputLateResult("");
+	}
+	
 }
