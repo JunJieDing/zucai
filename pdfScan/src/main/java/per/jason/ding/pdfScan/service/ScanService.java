@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -47,9 +48,14 @@ public class ScanService {
 	private static int curry_even = 10;
 	private static int curry_lose = 11;
 	
-	public void outputLateResult(String input){
-		String url = satFileUrl==null?input:satFileUrl;
-		scanLateCurrentRate(url);
+//	public void outputLateResult(String input){
+//		String url = satFileUrl==null?input:satFileUrl;
+//		Map<String,GameRate> map = processSatRate(scanLateCurrentRate(url));
+//	}
+	
+	public void genTuresResult(String inputUrl){
+		WeekResult wr = new WeekResult();
+		outputResult(inputUrl,wr);
 	}
 	
 	public void genWeekResult(String inputUrl){
@@ -59,11 +65,10 @@ public class ScanService {
 	}
 	
 	public void outputSundayResult(String inputUrl, WeekResult wr){
-		String url = fileurl==null?inputUrl:fileurl;
-		Map<String,GameRate> map = processInitRate(scanSundayInitRate(url));
-		processCurrentRate(scanSundayCurrentRate(url),map);
+		String url = fileurl==null?inputUrl:satFileUrl;
+		Map<String,GameRate> map = processSatRate(scanLateCurrentRate(url),wr.getRates());
 		for(GameRate gr: map.values()){
-			calGameRate(gr,wr);
+			calGameRate(gr);
 		}
 	}
 	
@@ -72,11 +77,13 @@ public class ScanService {
 		Map<String,GameRate> map = processInitRate(scanInitRate(url));
 		processCurrentRate(scanCurrentRate(url),map);
 		for(GameRate gr: map.values()){
-			calGameRate(gr,wr);
+			wr.getPoints().put(gr.getGameName(), calGameRate(gr));
 		}
 	}
 	
-	public GamePoint calGameRate(GameRate gr,WeekResult wr){
+	
+	
+	public GamePoint calGameRate(GameRate gr){
 		GamePoint gp = new GamePoint();
 		String gameName = gr.getGameName();
 		List<Integer> winRates = new ArrayList<Integer>();
@@ -97,8 +104,16 @@ public class ScanService {
 		List<Integer> nwinCurryRates = new ArrayList<Integer>();
 		List<Integer> nevenCurryRates = new ArrayList<Integer>();
 		List<Integer> nloseCurryRates = new ArrayList<Integer>();
+		List<Integer> fwinCurry = new ArrayList<Integer>();
+		List<Integer> fevenCurry = new ArrayList<Integer>();
+		List<Integer> floseCurry = new ArrayList<Integer>();
+		List<Integer> swinCurryRates = new ArrayList<Integer>();
+		List<Integer> sevenCurryRates = new ArrayList<Integer>();
+		List<Integer> sloseCurryRates = new ArrayList<Integer>();
+		
 		for(CompanyRate cr : gr.getCompanyRate().values()){
 			if(cr.getInitRate()!=null){
+				gr.getInitCompName().add(cr.getCompanyName().toLowerCase());
 				winRates.add(cr.getInitRate().getWin().multiply(new BigDecimal(100)).intValue());
 				evenRates.add(cr.getInitRate().getEven().multiply(new BigDecimal(100)).intValue());
 				loseRates.add(cr.getInitRate().getLose().multiply(new BigDecimal(100)).intValue());
@@ -123,6 +138,18 @@ public class ScanService {
 				nwinCurryRates.add(cr.getCurrentCurry().getWin().multiply(new BigDecimal(100)).intValue());
 				nevenCurryRates.add(cr.getCurrentCurry().getEven().multiply(new BigDecimal(100)).intValue());
 				nloseCurryRates.add(cr.getCurrentCurry().getLose().multiply(new BigDecimal(100)).intValue());
+			}
+			if(cr.getSatRate()!=null){
+				if(gr.getfCompName().contains(cr.getCompanyName())){
+					fwinCurry.add(cr.getSatRate().getWin().multiply(new BigDecimal(100)).intValue());
+					fevenCurry.add(cr.getSatRate().getEven().multiply(new BigDecimal(100)).intValue());
+					floseCurry.add(cr.getSatRate().getLose().multiply(new BigDecimal(100)).intValue());
+				}
+				if(gr.getInitCompName().contains(cr.getCompanyName())){
+					swinCurryRates.add(cr.getSatCurry().getWin().multiply(new BigDecimal(100)).intValue());
+					sevenCurryRates.add(cr.getSatCurry().getEven().multiply(new BigDecimal(100)).intValue());
+					sloseCurryRates.add(cr.getSatCurry().getLose().multiply(new BigDecimal(100)).intValue());
+				}
 			}
 			
 		}
@@ -156,6 +183,21 @@ public class ScanService {
 		gp.setNature_even(calDiffent(nevenRates).get(RESULT)/1);
 		gp.setNature_lose(calDiffent(nloseRates).get(RESULT)/1);
 		System.out.println(calDiffent(nwinRates).get(RESULT)/1+"    "+calDiffent(nevenRates).get(RESULT)/1+"    "+calDiffent(nloseRates).get(RESULT)/1);
+		if(fwinCurry.size()>0){
+			System.out.println("three curry");
+			System.out.println(calDiffent(fwinCurry).get(RESULT)/1+"    "+calDiffent(fevenCurry).get(RESULT)/1+"    "+calDiffent(floseCurry).get(RESULT)/1);
+			gp.setThree_win(calDiffent(fwinCurry).get(RESULT)/1);
+			gp.setThree_even(calDiffent(fevenCurry).get(RESULT)/1);
+			gp.setThree_lose(calDiffent(floseCurry).get(RESULT)/1);
+			System.out.println("four curry");
+			System.out.println(calDiffent(swinCurryRates).get(RESULT)/1+"    "+calDiffent(sevenCurryRates).get(RESULT)/1+"    "+calDiffent(sloseCurryRates).get(RESULT)/1);
+			gp.setFour_win(calDiffent(swinCurryRates).get(RESULT)/1);
+			gp.setFour_even(calDiffent(sevenCurryRates).get(RESULT)/1);
+			gp.setFour_lose(calDiffent(sloseCurryRates).get(RESULT)/1);
+
+		}
+		
+		
 		return gp;
 	}
 	
@@ -217,7 +259,6 @@ public class ScanService {
         return aa;  
     }
 
-	
 	public CompanyRate sambleCompanyRage(String companyName, String[] items){
 		CompanyRate rate = new CompanyRate();
 		rate.setCompanyName(companyName);
@@ -249,6 +290,47 @@ public class ScanService {
 			j++;
 		}
 		return initMap;
+	}
+	
+	public Map<String,GameRate> processSatRate(List<String> scanResult,Map<String,GameRate> map){
+		String[] gameList = new String[14];
+		int count=0;
+		for(String result : scanResult){
+			String[] lines = result.split("\n");
+			int s = count;
+			for(int lcount=0; lcount<lines.length;lcount++){
+				String line = lines[lcount];
+				if(lcount == 0)
+				for(String item : line.split("推介")){
+					if(item.contains("VS")){
+						gameList[count] = item.substring(item.indexOf("、")>0?item.indexOf("、")+2:-1).trim();
+						count++;
+					}
+				}
+				if(lcount>1){
+					String[] items = line.substring(line.indexOf(" ")+1).split(" ");
+					String compNam = line.substring(0, line.indexOf(" "));
+					for(int i=0,j=s; i<items.length ; i++){
+						if(i%7==0){
+							//for not open match
+							if(!Pattern.matches("^[0-9]+(.[0-9]{1,3})?$", items[i].trim())){
+								j++;i+=6; continue;
+							}
+						}
+						if(i%7==6){
+							GameRate gameR = map.get(gameList[j])==null?GameRate.initGameRate(gameList[j], j):map.get(gameList[j]);
+							CompanyRate compR = 	gameR.getCompanyRate().get(compNam)==null?
+									CompanyRate.initsatRate(compNam, new Rate(items[i-6], items[i-5], items[i-4]), new Rate(items[i-3], items[i-2],items[i-1])):
+									gameR.getCompanyRate().get(compNam).inputSatRate(new Rate(items[i-6], items[i-5], items[i-4]), new Rate(items[i-3], items[i-2],items[i-1]));
+							gameR.getCompanyRate().put(compR.getCompanyName(), compR);
+							map.put(gameR.getGameName(), gameR);
+							j++;
+						}
+					}
+				}
+			}
+		}
+		return map;
 	}
 	
 	public Map<String,GameRate>  processInitRate(List<String> inits){

@@ -12,6 +12,40 @@ public class CompanyRate {
 	
 	private Rate currentCurry;
 
+	private Rate satRate;
+	
+	private Rate satCurry;
+	
+	public static CompanyRate initsatRate(String companyName, Rate r, Rate curry){
+		CompanyRate rate = new CompanyRate();
+		rate.setCompanyName(companyName);
+		rate.setSatCurry(curry);
+		rate.setSatRate(r);
+		return rate;
+	}
+	
+	public CompanyRate inputSatRate(Rate rate, Rate curry){
+		this.setSatCurry(curry);
+		this.setSatRate(rate);
+		return this;
+	}
+	
+	public Rate getSatRate() {
+		return satRate;
+	}
+
+	public void setSatRate(Rate satRate) {
+		this.satRate = satRate;
+	}
+
+	public Rate getSatCurry() {
+		return satCurry;
+	}
+
+	public void setSatCurry(Rate satCurry) {
+		this.satCurry = satCurry;
+	}
+
 	public String getCompanyName() {
 		return companyName;
 	}

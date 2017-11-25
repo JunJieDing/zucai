@@ -11,9 +11,9 @@ public class Rate {
 	private BigDecimal lose;
 
 	public Rate(String win,String even,String lose){
-		this.win = new BigDecimal(win);
-		this.even = new BigDecimal(even);
-		this.lose = new BigDecimal(lose);
+		this.win = new BigDecimal(win.trim());
+		this.even = new BigDecimal(even.trim());
+		this.lose = new BigDecimal(lose.trim());
 		
 	}
 	

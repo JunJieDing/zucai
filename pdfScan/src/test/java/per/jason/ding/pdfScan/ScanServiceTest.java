@@ -17,12 +17,12 @@ public class ScanServiceTest {
 	
 	@Test
 	public void testScan(){
-		scanService.genWeekResult("");
+		scanService.genTuresResult("");
 	}
 	
 	@Test
 	public void testSatScan(){
-		scanService.outputLateResult("");
+		scanService.genWeekResult("");
 	}
 	
 }
