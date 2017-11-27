@@ -56,17 +56,40 @@ public class ScanService {
 	public void genTuresResult(String inputUrl){
 		WeekResult wr = new WeekResult();
 		outputResult(inputUrl,wr);
+		outputSundayResult(inputUrl, wr);
+
 	}
 	
 	public void genWeekResult(String inputUrl){
 		WeekResult wr = new WeekResult();
 		outputResult(inputUrl,wr);
+		outputSatResult(inputUrl, wr);
+		wr = new WeekResult();
 		outputSundayResult(inputUrl, wr);
+		outputSatSunResult(inputUrl, wr);
 	}
 	
 	public void outputSundayResult(String inputUrl, WeekResult wr){
+		String url = fileurl==null?inputUrl:fileurl;
+		Map<String,GameRate> map = processInitRate(scanSundayInitRate(url));
+		processCurrentRate(scanSundayCurrentRate(url),map);
+		for(GameRate gr: map.values()){
+			calGameRate(gr);
+			wr.getRates().put(gr.getGameName(), gr);
+		}
+	}
+	
+	public void outputSatResult(String inputUrl, WeekResult wr){
 		String url = fileurl==null?inputUrl:satFileUrl;
 		Map<String,GameRate> map = processSatRate(scanLateCurrentRate(url),wr.getRates());
+		for(GameRate gr: map.values()){
+			calGameRate(gr);
+		}
+	}
+	
+	public void outputSatSunResult(String inputUrl, WeekResult wr){
+		String url = fileurl==null?inputUrl:satFileUrl;
+		Map<String,GameRate> map = processSatRate(scanLateSunCurrentRate(url),wr.getRates());
 		for(GameRate gr: map.values()){
 			calGameRate(gr);
 		}
@@ -78,6 +101,7 @@ public class ScanService {
 		processCurrentRate(scanCurrentRate(url),map);
 		for(GameRate gr: map.values()){
 			wr.getPoints().put(gr.getGameName(), calGameRate(gr));
+			wr.getRates().put(gr.getGameName(), gr);
 		}
 	}
 	
@@ -156,33 +180,6 @@ public class ScanService {
 //		result.put(init_win, calDiffent(winRates).get(RESULT));
 		System.out.println(gr.getGameNo()+" "+gameName);
 		gp.setGameName(gameName);
-//		System.out.println("init rate");
-//		System.out.println(calDiffent(winRates).get(MAX)/1+"    "+calDiffent(evenRates).get(MAX)/1+"    "+calDiffent(loseRates).get(MAX)/1);
-//		System.out.println(calDiffent(winRates).get(MIN)/1+"    "+calDiffent(evenRates).get(MIN)/1+"    "+calDiffent(loseRates).get(MIN)/1);
-//		System.out.println(calDiffent(winRates).get(RESULT)/1+"    "+calDiffent(evenRates).get(RESULT)/1+"    "+calDiffent(loseRates).get(RESULT)/1);
-		System.out.println("init curry");
-//		System.out.println(calDiffent(winCurryRates).get(MAX)/1+"    "+calDiffent(evenCurryRates).get(MAX)/1+"    "+calDiffent(loseCurryRates).get(MAX)/1);
-//		System.out.println(calDiffent(winCurryRates).get(MIN)/1+"    "+calDiffent(evenCurryRates).get(MIN)/1+"    "+calDiffent(loseCurryRates).get(MIN)/1);
-		System.out.println(calDiffent(winCurryRates).get(RESULT)/1+"    "+calDiffent(evenCurryRates).get(RESULT)/1+"    "+calDiffent(loseCurryRates).get(RESULT)/1);
-		gp.setOne_win(calDiffent(winCurryRates).get(RESULT)/1);
-		gp.setOne_even(calDiffent(evenCurryRates).get(RESULT)/1);
-		gp.setOne_lose(calDiffent(loseCurryRates).get(RESULT)/1);
-		System.out.println("current curry");
-//		System.out.println(calDiffent(cwinRates).get(RESULT)/1+"    "+calDiffent(cevenRates).get(RESULT)/1+"    "+calDiffent(closeRates).get(RESULT)/1);
-		System.out.println(calDiffent(cwinCurryRates).get(RESULT)/1+"    "+calDiffent(cevenCurryRates).get(RESULT)/1+"    "+calDiffent(closeCurryRates).get(RESULT)/1);
-		gp.setTwo_win(calDiffent(cwinCurryRates).get(RESULT)/1);
-		gp.setTwo_even(calDiffent(cevenCurryRates).get(RESULT)/1);
-		gp.setTwo_lose(calDiffent(closeCurryRates).get(RESULT)/1);
-		System.out.println("nature curry");
-		System.out.println(calDiffent(nwinCurryRates).get(RESULT)/1+"    "+calDiffent(nevenCurryRates).get(RESULT)/1+"    "+calDiffent(nloseCurryRates).get(RESULT)/1);
-		gp.setNature_curry_win(calDiffent(nwinCurryRates).get(RESULT)/1);
-		gp.setNature_curry_even(calDiffent(nevenCurryRates).get(RESULT)/1);
-		gp.setNature_curry_lose(calDiffent(nloseCurryRates).get(RESULT)/1);
-		System.out.println("nature rate");
-		gp.setNature_win(calDiffent(nwinRates).get(RESULT)/1);
-		gp.setNature_even(calDiffent(nevenRates).get(RESULT)/1);
-		gp.setNature_lose(calDiffent(nloseRates).get(RESULT)/1);
-		System.out.println(calDiffent(nwinRates).get(RESULT)/1+"    "+calDiffent(nevenRates).get(RESULT)/1+"    "+calDiffent(nloseRates).get(RESULT)/1);
 		if(fwinCurry.size()>0){
 			System.out.println("three curry");
 			System.out.println(calDiffent(fwinCurry).get(RESULT)/1+"    "+calDiffent(fevenCurry).get(RESULT)/1+"    "+calDiffent(floseCurry).get(RESULT)/1);
@@ -194,7 +191,34 @@ public class ScanService {
 			gp.setFour_win(calDiffent(swinCurryRates).get(RESULT)/1);
 			gp.setFour_even(calDiffent(sevenCurryRates).get(RESULT)/1);
 			gp.setFour_lose(calDiffent(sloseCurryRates).get(RESULT)/1);
-
+		}else{
+	//		System.out.println("init rate");
+	//		System.out.println(calDiffent(winRates).get(MAX)/1+"    "+calDiffent(evenRates).get(MAX)/1+"    "+calDiffent(loseRates).get(MAX)/1);
+	//		System.out.println(calDiffent(winRates).get(MIN)/1+"    "+calDiffent(evenRates).get(MIN)/1+"    "+calDiffent(loseRates).get(MIN)/1);
+	//		System.out.println(calDiffent(winRates).get(RESULT)/1+"    "+calDiffent(evenRates).get(RESULT)/1+"    "+calDiffent(loseRates).get(RESULT)/1);
+			System.out.println("init curry");
+	//		System.out.println(calDiffent(winCurryRates).get(MAX)/1+"    "+calDiffent(evenCurryRates).get(MAX)/1+"    "+calDiffent(loseCurryRates).get(MAX)/1);
+	//		System.out.println(calDiffent(winCurryRates).get(MIN)/1+"    "+calDiffent(evenCurryRates).get(MIN)/1+"    "+calDiffent(loseCurryRates).get(MIN)/1);
+			System.out.println(calDiffent(winCurryRates).get(RESULT)/1+"    "+calDiffent(evenCurryRates).get(RESULT)/1+"    "+calDiffent(loseCurryRates).get(RESULT)/1);
+			gp.setOne_win(calDiffent(winCurryRates).get(RESULT)/1);
+			gp.setOne_even(calDiffent(evenCurryRates).get(RESULT)/1);
+			gp.setOne_lose(calDiffent(loseCurryRates).get(RESULT)/1);
+			System.out.println("current curry");
+	//		System.out.println(calDiffent(cwinRates).get(RESULT)/1+"    "+calDiffent(cevenRates).get(RESULT)/1+"    "+calDiffent(closeRates).get(RESULT)/1);
+			System.out.println(calDiffent(cwinCurryRates).get(RESULT)/1+"    "+calDiffent(cevenCurryRates).get(RESULT)/1+"    "+calDiffent(closeCurryRates).get(RESULT)/1);
+			gp.setTwo_win(calDiffent(cwinCurryRates).get(RESULT)/1);
+			gp.setTwo_even(calDiffent(cevenCurryRates).get(RESULT)/1);
+			gp.setTwo_lose(calDiffent(closeCurryRates).get(RESULT)/1);
+			System.out.println("nature curry");
+			System.out.println(calDiffent(nwinCurryRates).get(RESULT)/1+"    "+calDiffent(nevenCurryRates).get(RESULT)/1+"    "+calDiffent(nloseCurryRates).get(RESULT)/1);
+			gp.setNature_curry_win(calDiffent(nwinCurryRates).get(RESULT)/1);
+			gp.setNature_curry_even(calDiffent(nevenCurryRates).get(RESULT)/1);
+			gp.setNature_curry_lose(calDiffent(nloseCurryRates).get(RESULT)/1);
+			System.out.println("nature rate");
+			gp.setNature_win(calDiffent(nwinRates).get(RESULT)/1);
+			gp.setNature_even(calDiffent(nevenRates).get(RESULT)/1);
+			gp.setNature_lose(calDiffent(nloseRates).get(RESULT)/1);
+			System.out.println(calDiffent(nwinRates).get(RESULT)/1+"    "+calDiffent(nevenRates).get(RESULT)/1+"    "+calDiffent(nloseRates).get(RESULT)/1);
 		}
 		
 		
@@ -303,7 +327,7 @@ public class ScanService {
 				if(lcount == 0)
 				for(String item : line.split("推介")){
 					if(item.contains("VS")){
-						gameList[count] = item.substring(item.indexOf("、")>0?item.indexOf("、")+2:-1).trim();
+						gameList[count] = item.substring(item.indexOf("、")>0 ? item.indexOf("、")+1 +(item.indexOf("、1")>0?1:0): -1).trim();
 						count++;
 					}
 				}
@@ -363,6 +387,16 @@ public class ScanService {
 	public List<String> scanLateCurrentRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
 		Integer page= 1;
+		points.add(PdfScanPoint.genPoint(page, 705, 100, 350, 250,"公司名称", "", 1500,"最高赔率"));
+		points.add(PdfScanPoint.genPoint(page, 0, 350, 1500, 250,"公司名称", "", 1500,"最高赔率"));
+		points.add(PdfScanPoint.genPoint(page, 0, 600, 1500, 250,"公司名称", "", 1500,"最高赔率"));
+		return scanPdf.scanPdf(url, points);
+	
+	}
+	
+	public List<String> scanLateSunCurrentRate(String url){
+		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
+		Integer page= 6;
 		points.add(PdfScanPoint.genPoint(page, 705, 100, 350, 250,"公司名称", "", 1500,"最高赔率"));
 		points.add(PdfScanPoint.genPoint(page, 0, 350, 1500, 250,"公司名称", "", 1500,"最高赔率"));
 		points.add(PdfScanPoint.genPoint(page, 0, 600, 1500, 250,"公司名称", "", 1500,"最高赔率"));
