@@ -165,11 +165,11 @@ public class ScanService {
 			}
 			if(cr.getSatRate()!=null){
 				if(gr.getfCompName().contains(cr.getCompanyName())){
-					fwinCurry.add(cr.getSatRate().getWin().multiply(new BigDecimal(100)).intValue());
-					fevenCurry.add(cr.getSatRate().getEven().multiply(new BigDecimal(100)).intValue());
-					floseCurry.add(cr.getSatRate().getLose().multiply(new BigDecimal(100)).intValue());
+					fwinCurry.add(cr.getSatCurry().getWin().multiply(new BigDecimal(100)).intValue());
+					fevenCurry.add(cr.getSatCurry().getEven().multiply(new BigDecimal(100)).intValue());
+					floseCurry.add(cr.getSatCurry().getLose().multiply(new BigDecimal(100)).intValue());
 				}
-				if(gr.getInitCompName().contains(cr.getCompanyName())){
+				if(gr.getInitCompName().contains(cr.getCompanyName().toLowerCase().trim())){
 					swinCurryRates.add(cr.getSatCurry().getWin().multiply(new BigDecimal(100)).intValue());
 					sevenCurryRates.add(cr.getSatCurry().getEven().multiply(new BigDecimal(100)).intValue());
 					sloseCurryRates.add(cr.getSatCurry().getLose().multiply(new BigDecimal(100)).intValue());
