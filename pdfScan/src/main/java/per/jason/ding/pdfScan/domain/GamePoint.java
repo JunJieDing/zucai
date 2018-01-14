@@ -46,6 +46,19 @@ public class GamePoint {
 	
 	private Integer nature_curry_lose;
 
+	public void inputThreeAndFour(GamePoint gp){
+		this.setThree_win(gp.getThree_win());
+		this.setFour_win(gp.getFour_win());
+
+		this.setThree_even(gp.getThree_even());
+		this.setFour_even(gp.getFour_even());
+
+		this.setThree_lose(gp.getThree_lose());
+		this.setFour_lose(gp.getFour_lose());
+
+	}
+	
+	
 	public String getGameName() {
 		return gameName;
 	}

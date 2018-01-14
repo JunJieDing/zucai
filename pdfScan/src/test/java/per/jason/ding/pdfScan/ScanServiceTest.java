@@ -25,4 +25,11 @@ public class ScanServiceTest {
 		scanService.genWeekResult("");
 	}
 	
+	@Test
+	public void testGrebDate(){
+		scanService.grebDate(null);
+	}
+	
+	
+	
 }

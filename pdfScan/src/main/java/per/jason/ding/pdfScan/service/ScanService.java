@@ -7,11 +7,14 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.alibaba.fastjson.JSON;
 
 import per.jason.ding.pdfScan.domain.CompanyRate;
 import per.jason.ding.pdfScan.domain.GamePoint;
@@ -67,6 +70,7 @@ public class ScanService {
 		wr = new WeekResult();
 		outputSundayResult(inputUrl, wr);
 		outputSatSunResult(inputUrl, wr);
+		System.out.println(JSON.toJSON(wr));
 	}
 	
 	public void outputSundayResult(String inputUrl, WeekResult wr){
@@ -74,7 +78,7 @@ public class ScanService {
 		Map<String,GameRate> map = processInitRate(scanSundayInitRate(url));
 		processCurrentRate(scanSundayCurrentRate(url),map);
 		for(GameRate gr: map.values()){
-			calGameRate(gr);
+			wr.getPoints().put(gr.getGameName(), calGameRate(gr));
 			wr.getRates().put(gr.getGameName(), gr);
 		}
 	}
@@ -83,7 +87,16 @@ public class ScanService {
 		String url = fileurl==null?inputUrl:satFileUrl;
 		Map<String,GameRate> map = processSatRate(scanLateCurrentRate(url),wr.getRates());
 		for(GameRate gr: map.values()){
-			calGameRate(gr);
+			GameRate initGr = wr.getRates().get(gr.getGameName());
+			gr.setInitCompName(initGr.getInitCompName());
+			GamePoint gp = calGameRate(gr);
+			GamePoint orinalgp = wr.getPoints().get(gr.getGameName());
+			if(orinalgp!=null){
+				orinalgp.inputThreeAndFour(gp);
+				wr.getPoints().put(gr.getGameName(), orinalgp);
+			}else{
+				wr.getPoints().put(gr.getGameName(), gp);
+			}
 		}
 	}
 	
@@ -91,7 +104,14 @@ public class ScanService {
 		String url = fileurl==null?inputUrl:satFileUrl;
 		Map<String,GameRate> map = processSatRate(scanLateSunCurrentRate(url),wr.getRates());
 		for(GameRate gr: map.values()){
-			calGameRate(gr);
+			GamePoint gp = calGameRate(gr);
+			GamePoint orinalgp = wr.getPoints().get(gr.getGameName());
+			if(orinalgp!=null){
+				orinalgp.inputThreeAndFour(gp);
+				wr.getPoints().put(gr.getGameName(), orinalgp);
+			}else{
+				wr.getPoints().put(gr.getGameName(), gp);
+			}
 		}
 	}
 	
@@ -180,6 +200,7 @@ public class ScanService {
 //		result.put(init_win, calDiffent(winRates).get(RESULT));
 		System.out.println(gr.getGameNo()+" "+gameName);
 		gp.setGameName(gameName);
+		gp.setGameSeq(gr.getGameNo());
 		if(fwinCurry.size()>0){
 			System.out.println("three curry");
 			System.out.println(calDiffent(fwinCurry).get(RESULT)/1+"    "+calDiffent(fevenCurry).get(RESULT)/1+"    "+calDiffent(floseCurry).get(RESULT)/1);
@@ -316,6 +337,14 @@ public class ScanService {
 		return initMap;
 	}
 	
+	public static String removeNum(String str) {  
+        String regEx = "[0-9]";  
+        Pattern p = Pattern.compile(regEx);  
+        Matcher m = p.matcher(str);  
+    //替换与模式匹配的所有字符（即数字的字符将被""替换）  
+        return m.replaceAll("").trim();  
+    } 
+	
 	public Map<String,GameRate> processSatRate(List<String> scanResult,Map<String,GameRate> map){
 		String[] gameList = new String[14];
 		int count=0;
@@ -327,7 +356,7 @@ public class ScanService {
 				if(lcount == 0)
 				for(String item : line.split("推介")){
 					if(item.contains("VS")){
-						gameList[count] = item.substring(item.indexOf("、")>0 ? item.indexOf("、")+1 +(item.indexOf("、1")>0?1:0): -1).trim();
+						gameList[count] = removeNum(item.substring(item.indexOf("、")>0 ? item.indexOf("、")+1 +(item.indexOf("、1")>0?1:0):item.indexOf(" ")).trim());
 						count++;
 					}
 				}
@@ -407,10 +436,10 @@ public class ScanService {
 	public List<String> scanSundayInitRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
 		Integer[] beginx = {290,435,590,750};
-		Integer beginy = 520;
+		Integer beginy = 420;
 		Integer[] endx = {435,590,750,900};
 		Integer iterWigth = 160;
-		Integer iterHeight = 100;
+		Integer iterHeight = 110;
 		Integer page= 12;
 		for(int i = -1,j=2 ; i<=14 ; i++){
 			if(i>0){
@@ -419,7 +448,7 @@ public class ScanService {
 				j++;
 			}
 			if(i==2||i==6||i==10){
-				beginy += (iterHeight-40);
+				beginy += (iterHeight-35);
 			}
 			
 		}
@@ -447,6 +476,15 @@ public class ScanService {
 //		return scanPdf.scanPdf("/Users/dingjunjie/Downloads/1292.pdf",points);
 		return scanPdf.scanPdf(url, points);
 	}
+	
+	public List<String> grebDate(String inputUrl){
+		String url = fileurl==null?inputUrl:fileurl;
+		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
+		points.add(PdfScanPoint.genPoint(0, 0, 0, 300, 300, null, null, 300, null));
+		return scanPdf.scanPdf(url, points);
+	}
+	
+	
 	
 	public List<String> scanInitRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
@@ -482,6 +520,7 @@ public class ScanService {
 		for(int i=0; i<14;i++){
 			PdfScanPoint point = PdfScanPoint.genPoint(page, beginx[i%2], beginy, endx[i%2]-beginx[i%2], iterHeight,"凯利指数 赔付", "", beginy+300,"周三99家平均") ;
 			points.add(point);
+			
 			if(i!=1&&i!=7&&i%2==1){
 				beginy +=(iterHeight+250);
 			}else if(i==1||i==7){
