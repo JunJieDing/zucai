@@ -425,7 +425,7 @@ public class ScanService {
 	
 	public List<String> scanLateSunCurrentRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
-		Integer page= 6;
+		Integer page= 4;
 		points.add(PdfScanPoint.genPoint(page, 705, 100, 350, 250,"公司名称", "", 1500,"最高赔率"));
 		points.add(PdfScanPoint.genPoint(page, 0, 350, 1500, 250,"公司名称", "", 1500,"最高赔率"));
 		points.add(PdfScanPoint.genPoint(page, 0, 600, 1500, 250,"公司名称", "", 1500,"最高赔率"));
@@ -436,11 +436,11 @@ public class ScanService {
 	public List<String> scanSundayInitRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
 		Integer[] beginx = {290,435,590,750};
-		Integer beginy = 420;
+		Integer beginy = 460;
 		Integer[] endx = {435,590,750,900};
 		Integer iterWigth = 160;
-		Integer iterHeight = 110;
-		Integer page= 12;
+		Integer iterHeight = 80;
+		Integer page= 10;
 		for(int i = -1,j=2 ; i<=14 ; i++){
 			if(i>0){
 				PdfScanPoint point = PdfScanPoint.genPoint(page, beginx[j%4], beginy, endx[j%4]-beginx[j%4], iterHeight,"VS", "推介", 1500,"VS") ;
@@ -448,7 +448,7 @@ public class ScanService {
 				j++;
 			}
 			if(i==2||i==6||i==10){
-				beginy += (iterHeight-35);
+				beginy += (iterHeight);
 			}
 			
 		}
@@ -462,9 +462,9 @@ public class ScanService {
 		Integer[] endx={360,810};
 		Integer iterHeight = 200;
 		Integer beginy = 1150;
-		Integer page = 9;
+		Integer page = 7;
 		for(int i=0; i<14;i++){
-			PdfScanPoint point = PdfScanPoint.genPoint(page, beginx[i%2], beginy, endx[i%2]-beginx[i%2], iterHeight,"凯利指数 赔付", "", beginy+300,"周三99家平均") ;
+			PdfScanPoint point = PdfScanPoint.genPoint(page, beginx[i%2], beginy, endx[i%2]-beginx[i%2], iterHeight,"凯利指数 赔付", "", beginy+300,"99家平均") ;
 			points.add(point);
 			if(i!=1&&i!=7&&i%2==1){
 				beginy +=(iterHeight+250);
