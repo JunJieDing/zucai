@@ -26,6 +26,11 @@ public class ScanServiceTest {
 	}
 	
 	@Test
+	public void testFriScan(){
+		scanService.outputFridayResult("");
+	}
+	
+	@Test
 	public void testGrebDate(){
 		scanService.grebDate(null);
 	}

@@ -73,6 +73,14 @@ public class ScanService {
 		System.out.println(JSON.toJSON(wr));
 	}
 	
+	public void outputFridayResult(String inputUrl){
+		String url = fileurl==null?inputUrl:fileurl;
+		Map<String,GameRate> map = processFirdayRate(scanFridayRate(url));
+		for(GameRate gr: map.values()){
+			calFriGameRate(gr);
+		}
+	}
+	
 	public void outputSundayResult(String inputUrl, WeekResult wr){
 		String url = fileurl==null?inputUrl:fileurl;
 		Map<String,GameRate> map = processInitRate(scanSundayInitRate(url));
@@ -125,7 +133,45 @@ public class ScanService {
 		}
 	}
 	
-	
+	public GamePoint calFriGameRate(GameRate gr){
+		GamePoint gp = new GamePoint();
+		String gameName = gr.getGameName();
+		List<Integer> winRates = new ArrayList<Integer>();
+		List<Integer> evenRates = new ArrayList<Integer>();
+		List<Integer> loseRates = new ArrayList<Integer>();
+		List<Integer> winCurryRates = new ArrayList<Integer>();
+		List<Integer> evenCurryRates = new ArrayList<Integer>();
+		List<Integer> loseCurryRates = new ArrayList<Integer>();
+		
+		for(CompanyRate cr : gr.getCompanyRate().values()){
+			if(cr.getInitRate()!=null){
+				gr.getInitCompName().add(cr.getCompanyName().toLowerCase());
+				winRates.add(cr.getInitRate().getWin().multiply(new BigDecimal(100)).intValue());
+				evenRates.add(cr.getInitRate().getEven().multiply(new BigDecimal(100)).intValue());
+				loseRates.add(cr.getInitRate().getLose().multiply(new BigDecimal(100)).intValue());
+				winCurryRates.add(cr.getInitCurry().getWin().multiply(new BigDecimal(100)).intValue());
+				evenCurryRates.add(cr.getInitCurry().getEven().multiply(new BigDecimal(100)).intValue());
+				loseCurryRates.add(cr.getInitCurry().getLose().multiply(new BigDecimal(100)).intValue());
+				
+			}
+		}
+//		result.put(init_win, calDiffent(winRates).get(RESULT));
+		System.out.println(gameName);
+		gp.setGameName(gameName);
+		gp.setGameSeq(gr.getGameNo());
+		System.out.println("init rate");
+//			System.out.println(calDiffent(winRates).get(MAX)/1+"    "+calDiffent(evenRates).get(MAX)/1+"    "+calDiffent(loseRates).get(MAX)/1);
+//			System.out.println(calDiffent(winRates).get(MIN)/1+"    "+calDiffent(evenRates).get(MIN)/1+"    "+calDiffent(loseRates).get(MIN)/1);
+		System.out.println(calDiffent(winRates).get(RESULT)/1+"    "+calDiffent(evenRates).get(RESULT)/1+"    "+calDiffent(loseRates).get(RESULT)/1);
+		System.out.println("init curry");
+//		System.out.println(calDiffent(winCurryRates).get(MAX)/1+"    "+calDiffent(evenCurryRates).get(MAX)/1+"    "+calDiffent(loseCurryRates).get(MAX)/1);
+//		System.out.println(calDiffent(winCurryRates).get(MIN)/1+"    "+calDiffent(evenCurryRates).get(MIN)/1+"    "+calDiffent(loseCurryRates).get(MIN)/1);
+		System.out.println(calDiffent(winCurryRates).get(RESULT)/1+"    "+calDiffent(evenCurryRates).get(RESULT)/1+"    "+calDiffent(loseCurryRates).get(RESULT)/1);
+		gp.setOne_win(calDiffent(winCurryRates).get(RESULT)/1);
+		gp.setOne_even(calDiffent(evenCurryRates).get(RESULT)/1);
+		gp.setOne_lose(calDiffent(loseCurryRates).get(RESULT)/1);
+		return gp;
+	}
 	
 	public GamePoint calGameRate(GameRate gr){
 		GamePoint gp = new GamePoint();
@@ -258,6 +304,33 @@ public class ScanService {
 		result.put(MIN, min);
 		result.put(RESULT, max-min);
 		return result;
+	}
+	
+	//TODO
+	public Map<String,GameRate>  processFirdayRate(List<String> inits){
+		Map<String,GameRate> map = new LinkedHashMap<String, GameRate>();
+		for(String init : inits){
+			GameRate game = new GameRate();
+			String[] lines = init.split("\n");
+			for(int i=0 ; i<lines.length ; i++){
+				CompanyRate company = new CompanyRate();
+				String line = lines[i];
+				if(i==0){
+					game.setGameName(line.substring(0,line.lastIndexOf("北京时间")));
+				}
+				if(i>1 && (line.toLowerCase().contains("bet365")||line.toLowerCase().contains("bwin")
+						||line.toLowerCase().contains("立博")||line.toLowerCase().contains("威廉希尔"))){
+					String[] items = line.split(" ");
+					if(items.length<11) continue;
+					company.setCompanyName(items[1].toLowerCase());
+					company.setInitRate(new Rate(items[2],items[3],items[4]));
+					company.setInitCurry(new Rate(items[8],items[9],items[10]));
+					game.getCompanyRate().put(company.getCompanyName(), company);
+				}
+			}
+			map.put(game.getGameName(), game);
+		}
+		return map;
 	}
 	
 	public Map<String,GameRate> processLateRate(List<String> late){
@@ -484,7 +557,25 @@ public class ScanService {
 		return scanPdf.scanPdf(url, points);
 	}
 	
-	
+	public List<String> scanFridayRate(String url){
+		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();
+		Integer[] beginx = {50,440,750};
+		Integer beginy = 150;
+		Integer[] endx = {350,660,945};
+		Integer iterHeight = 200;
+		Integer page= 11;
+		for(int i =0 ; i<14 ; i++){
+			PdfScanPoint point = PdfScanPoint.genPoint(page, beginx[i%3], beginy, endx[i%3]-beginx[i%3], iterHeight,"北京时间", "", 3000,"全 场") ;
+			points.add(point);
+			if(i%3==2){
+				beginy += (iterHeight);
+			}
+			
+		}
+//		return scanPdf.scanPdf("/Users/dingjunjie/Downloads/1292.pdf",points);
+		return scanPdf.scanPdf(url, points);
+
+	}
 	
 	public List<String> scanInitRate(String url){
 		List<PdfScanPoint> points = new ArrayList<PdfScanPoint>();

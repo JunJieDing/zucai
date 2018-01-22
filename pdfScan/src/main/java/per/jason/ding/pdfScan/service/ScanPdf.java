@@ -45,7 +45,7 @@ public class ScanPdf {
             for(PdfScanPoint scanPoint : scanPoints){
 	            PDFTextStripperByArea stripperArea = new PDFTextStripperByArea();
 	            stripperArea.setSortByPosition(true);
-	            Rectangle rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), (y==null||y<0)?scanPoint.getHeight():y);
+	            Rectangle rect = new Rectangle(scanPoint.getX(), scanPoint.getY(), scanPoint.getWidth(), (y==null||y<30)?scanPoint.getHeight():y);
 	            stripperArea.addRegion("class1", rect);
 	            PDPage page = document.getPage(scanPoint.getPageNum());
 	            stripperArea.extractRegions( page );
