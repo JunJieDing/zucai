@@ -312,21 +312,19 @@ public class ScanService {
 		for(String init : inits){
 			GameRate game = new GameRate();
 			String[] lines = init.split("\n");
+			boolean flag = false;
 			for(int i=0 ; i<lines.length ; i++){
 				CompanyRate company = new CompanyRate();
 				String line = lines[i];
 				if(i==0){
 					game.setGameName(line.substring(0,line.lastIndexOf("北京时间")));
 				}
-				if(i>1 && (line.toLowerCase().contains("bet365")||line.toLowerCase().contains("bwin")
-						||line.toLowerCase().contains("立博")||line.toLowerCase().contains("威廉希尔"))){
 					String[] items = line.split(" ");
 					if(items.length<11) continue;
 					company.setCompanyName(items[1].toLowerCase());
 					company.setInitRate(new Rate(items[2],items[3],items[4]));
 					company.setInitCurry(new Rate(items[8],items[9],items[10]));
 					game.getCompanyRate().put(company.getCompanyName(), company);
-				}
 			}
 			map.put(game.getGameName(), game);
 		}
